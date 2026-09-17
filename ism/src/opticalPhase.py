@@ -120,20 +120,22 @@ class opticalPhase(initIsm):
 
         toa = np.zeros((sgm_toa.shape[0], sgm_toa.shape[1]))
 
-        isrf_n = isrf / sum(isrf)
+        isrf_n = isrf / np.sum(isrf)
         # convert isrf wavelenghts to nm
         wv_isrf_nm = wv_isrf * 1000
         # create interpolant of isrf, interp isrf to sgm wavelenghts
-        cs = interp1d(wv_isrf_nm, isrf_n, fill_value=(0, 0), bounds_error=False)
+       #cs = interp1d(wv_isrf_nm, isrf_n, fill_value=(0, 0), bounds_error=False)
 
-        interp_isrf = cs(sgm_wv)
+       #interp_isrf = cs(sgm_wv)
+
+       #for ialt in range(sgm_toa.shape[0]):
+           #for iact in range(sgm_toa.shape[1]):
+               #toa[ialt, iact] = np.sum(sgm_toa[ialt,iact,:]*interp_isrf)
 
         for ialt in range(sgm_toa.shape[0]):
             for iact in range(sgm_toa.shape[1]):
-                toa[ialt, iact] = sum(sgm_toa[ialt,iact,:]*interp_isrf
+                cs = interp1d(sgm_wv,sgm_toa[ialt,iact,:],fill_value=(0,0),bounds_error=False)
+                sgm_inter = cs(wv_isrf_nm)
+                toa[ialt,iact] = np.sum(sgm_inter*isrf_n)
 
         return toa
-
-
-
-
