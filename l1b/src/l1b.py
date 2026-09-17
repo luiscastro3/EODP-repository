@@ -63,7 +63,7 @@ class l1b(initL1b):
         :return: TOA in DN, equalized
         """
         #TODO
-        toa = (toa - eq_add) / eq_mult
+        toa = (toa - eq_add)/eq_mult
         return toa
 
     def restoration(self,toa,gain):
