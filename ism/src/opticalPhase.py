@@ -93,8 +93,8 @@ class opticalPhase(initIsm):
         :return: TOA image in irradiances [mW/m2]
         """
         # TODO
+        toa = Tr*toa*np.pi/4*(D/f)^2
         return toa
-
 
     def applySysMtf(self, toa, Hsys):
         """
