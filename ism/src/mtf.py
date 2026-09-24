@@ -164,6 +164,8 @@ class mtf:
         :return: WFE Aberrations MTF
         """
         #TODO
+
+        Hwfe = np.exp(-fr2D*(1-fr2D)*(kLF*(wLF/lambd)**2+kHF*(wHF/lambd)**2))
         return Hwfe
 
     def mtfDetector(self,fn2D):
@@ -173,6 +175,8 @@ class mtf:
         :return: detector MTF
         """
         #TODO
+
+        Hdet = np.abs(np.sinc(fn2D))
         return Hdet
 
     def mtfSmearing(self, fnAlt, ncolumns, ksmear):
