@@ -119,6 +119,17 @@ class mtf:
         :return: diffraction MTF
         """
         #TODO
+
+        Hdiff = np.zeros(fr2D.shape, dtype=float)
+
+        for i in range(rows):
+            for j in range(cols):
+                fr = abs(fr2D[i, j])
+
+                if fr < 1.0:
+                    Hdiff[i, j] = (2.0 / np.pi) * (np.arccos(fr) - fr * np.sqrt(1.0 - fr ** 2))
+                else:
+                    Hdiff[i, j] = 0.0
         return Hdiff
 
 
