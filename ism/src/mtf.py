@@ -120,7 +120,8 @@ class mtf:
         """
         #TODO
 
-        Hdiff = np.zeros(fr2D.shape, dtype=float)
+        rows, cols = fr2D.shape
+        Hdiff = np.zeros((rows,cols), dtype=float)
 
         for i in range(rows):
             for j in range(cols):
@@ -143,6 +144,12 @@ class mtf:
         :return: Defocus MTF
         """
         #TODO
+
+        x = np.pi*defocus*fr2D*(1-fr2D)
+
+        J1 = x/2 - (x**3)/16 + (x**5)/384 - (x**7)/18432
+
+        Hdefoc = 2*J1/x
         return Hdefoc
 
     def mtfWfeAberrations(self, fr2D, lambd, kLF, wLF, kHF, wHF):
