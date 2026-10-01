@@ -104,6 +104,28 @@ class opticalPhase(initIsm):
         :return: TOA image in irradiances [mW/m2]
         """
         # TODO
+
+        # Step 1
+        GE = fft2(toa)
+
+        # Step 2
+        Hsys_shifted = fftshift(Hsys)
+
+        # Step 3
+        GE_filtered = GE * Hsys_shifted
+
+        # Step 4
+        toa_complex = ifft2(GE_filtered)
+
+        # Check that the imaginary part is negligible
+        imag_part = np.imag(toa_complex)
+        max_imag_val = np.max(np.abs(imag_part))
+        if max_imag_val > 1e-5:
+            self.logger.warning(f"Imaginary part may not be negligible. Max absolute value: {max_imag_val}")
+
+        # Keep only the real part
+        toa_ft = np.real(toa_complex)
+
         return toa_ft
 
     def spectralIntegration(self, sgm_toa, sgm_wv, band):
