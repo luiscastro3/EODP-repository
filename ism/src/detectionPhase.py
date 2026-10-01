@@ -122,6 +122,10 @@ class detectionPhase(initIsm):
         #TODO
 
         toae = toa*QE
+
+        # Check Ne < FWC
+        if np.any(toae > self.ismConfig.FWC):
+            self.logger.warning("Number of electrons exceed FWC")
         return toae
 
     def badDeadPixels(self, toa,bad_pix,dead_pix,bad_pix_red,dead_pix_red):
