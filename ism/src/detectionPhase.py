@@ -174,4 +174,14 @@ class detectionPhase(initIsm):
         :return: TOA in [e-] with dark signal
         """
         #TODO
+        n_act = toa.shape[1]
+        # Dark Signal Non Uniformity
+        dsnu_act = np.abs(np.random.normal(0.0,1.0,n_act))*kdsnu
+        # Constant component of the Dark Signal
+        Sd = ds_A_coeff*(T/Tref)**3*np.exp(-ds_B_coeff*(1/T - 1/Tref))
+
+        # Dark Signal
+        DS = Sd*(1+dsnu_act)
+
+        toa = toa + DS
         return toa
