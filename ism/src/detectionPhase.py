@@ -149,6 +149,16 @@ class detectionPhase(initIsm):
         :return: TOA after adding PRNU [e-]
         """
         #TODO
+
+        # Number of pixels ACT
+        n_act = toa.shape[1]
+
+        # PRNU for each pixel as the standard normal distribution multiplied by kprnu
+        prnu_act = np.random.normal(0.0, 1.0, n_act) * kprnu
+
+        # Apply the time-invariant error to the TOA image for each instant of time
+        toa = toa * (1 + prnu_act)
+
         return toa
 
 
