@@ -225,5 +225,91 @@ class mtf:
         :return: N/A
         """
         #TODO
+        # Determine the zero-frequency center indices
+        idalt = nlines // 2
+        idact = ncolumns // 2
+
+        # Extract only the positive frequency side (from the center to the right)
+        # Slices for ACT: varying ACT (columns), fixed ALT (lines) at center
+        fnAct_pos = fnAct[idact:]
+        diff_act = Hdiff[idalt, idact:]
+        defoc_act = Hdefoc[idalt, idact:]
+        wfe_act = Hwfe[idalt, idact:]
+        det_act = Hdet[idalt, idact:]
+        smear_act = Hsmear[idalt, idact:]
+        motion_act = Hmotion[idalt, idact:]
+        sys_act = Hsys[idalt, idact:]
+
+        # Slices for ALT: varying ALT (lines), fixed ACT (columns) at center
+        fnAlt_pos = fnAlt[idalt:]
+        diff_alt = Hdiff[idalt:, idact]
+        defoc_alt = Hdefoc[idalt:, idact]
+        wfe_alt = Hwfe[idalt:, idact]
+        det_alt = Hdet[idalt:, idact]
+        smear_alt = Hsmear[idalt:, idact]
+        motion_alt = Hmotion[idalt:, idact]
+        sys_alt = Hsys[idalt:, idact]
+
+        # Ensure the directory exists
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        # ---------------------------------------------------------
+        # 1. Plot System MTF - slice ACT
+        # ---------------------------------------------------------
+        plt.figure(figsize=(12, 7))
+        plt.plot(fnAct_pos, diff_act, label='Diffraction MTF', alpha=0.8)
+        plt.plot(fnAct_pos, defoc_act, label='Defocus MTF', alpha=0.8)
+        plt.plot(fnAct_pos, wfe_act, label='WFE Aberrations MTF', alpha=0.8)
+        plt.plot(fnAct_pos, det_act, label='Detector MTF', alpha=0.8)
+        plt.plot(fnAct_pos, smear_act, label='Smearing MTF', alpha=0.8)
+        plt.plot(fnAct_pos, motion_act, label='Motion blur MTF', alpha=0.8)
+        plt.plot(fnAct_pos, sys_act, label='System MTF', color='black',
+                 linewidth=2.5)  # Thick black line for System MTF[cite: 4]
+
+        # Nyquist frequency line at 0.5[cite: 4]
+        plt.vlines(0.5, 0, 1, colors='black', linestyles='dashed', linewidth=2.5, label='f Nyquist')
+
+        plt.title('System MTF - slice ACT', fontsize=14)  # [cite: 4]
+        plt.xlabel('Spatial frequencies f/(1/w) [-]', fontsize=12)  # [cite: 4]
+        plt.ylabel('MTF', fontsize=12)  # [cite: 4]
+        plt.grid(True, alpha=0.6)  # Grid lines[cite: 4]
+        plt.legend(loc='lower left', fontsize=9)  # Legend placement[cite: 4]
+
+        plt.xlim(-0.02, 0.52)  # Constrain spatial frequencies around [0, 0.5][cite: 4]
+        plt.ylim(-0.05, 1.05)  # Constrain MTF values around [0, 1][cite: 4]
+
+        act_filename = os.path.join(directory, f'system_mtf_act_{band}.png')
+        plt.savefig(act_filename, dpi=300, bbox_inches='tight')
+        plt.close()
+
+        # ---------------------------------------------------------
+        # 2. Plot System MTF - slice ALT
+        # ---------------------------------------------------------
+        plt.figure(figsize=(12, 7))
+        plt.plot(fnAlt_pos, diff_alt, label='Diffraction MTF', alpha=0.8)
+        plt.plot(fnAlt_pos, defoc_alt, label='Defocus MTF', alpha=0.8)
+        plt.plot(fnAlt_pos, wfe_alt, label='WFE Aberrations MTF', alpha=0.8)
+        plt.plot(fnAlt_pos, det_alt, label='Detector MTF', alpha=0.8)
+        plt.plot(fnAlt_pos, smear_alt, label='Smearing MTF', alpha=0.8)
+        plt.plot(fnAlt_pos, motion_alt, label='Motion blur MTF', alpha=0.8)
+        plt.plot(fnAlt_pos, sys_alt, label='System MTF', color='black',
+                 linewidth=2.5)  # Thick black line for System MTF[cite: 5]
+
+        # Nyquist frequency line at 0.5[cite: 5]
+        plt.vlines(0.5, 0, 1, colors='black', linestyles='dashed', linewidth=2.5, label='f Nyquist')
+
+        plt.title('System MTF - slice ALT', fontsize=14)  # [cite: 5]
+        plt.xlabel('Spatial frequencies f/(1/w) [-]', fontsize=12)  # [cite: 5]
+        plt.ylabel('MTF', fontsize=12)  # [cite: 5]
+        plt.grid(True, alpha=0.6)  # Grid lines[cite: 5]
+        plt.legend(loc='lower left', fontsize=9)  # Legend placement[cite: 5]
+
+        plt.xlim(-0.02, 0.52)  # Constrain spatial frequencies around [0, 0.5][cite: 5]
+        plt.ylim(-0.05, 1.05)  # Constrain MTF values around [0, 1][cite: 5]
+
+        alt_filename = os.path.join(directory, f'system_mtf_alt_{band}.png')
+        plt.savefig(alt_filename, dpi=300, bbox_inches='tight')
+        plt.close()
 
 
