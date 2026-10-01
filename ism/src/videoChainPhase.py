@@ -70,5 +70,14 @@ class videoChainPhase(initIsm):
         :return: toa in digital counts
         """
         #TODO
+
+        # Maximum digital value based on bit depth
+        max_dn = (2**bit_depth) - 1
+
+        # Apply the digitisation formula to convert voltage to digital counts
+        toa_dn = np.round((toa/(max_voltage - min_voltage))*max_dn)
+
+        # Saturate values: set anything below 0 to 0, and anything above max_dn to max_dn
+        toa_dn = np.clip(toa_dn,0,max_dn)
         return toa_dn
 
