@@ -142,6 +142,36 @@ class detectionPhase(initIsm):
         :return: toa in e- including bad & dead pixels
         """
         #TODO
+
+        # Get the number of pixels in the across-track direction
+        toa_act = toa.shape[1]
+
+        # Calculate the number of pixels affected (using int() instead of np.round())
+        n_bad = int(toa_act * (bad_pix / 100.0))
+        n_dead = int(toa_act * (dead_pix / 100.0))
+
+        # Determine evenly distributed steps and apply to the CCD (using int() for the step)
+        idx_bad = []
+        if n_bad > 0:
+            step_bad = int(toa_act / n_bad)
+            # Distribute evenly in the CCD starting at index 5
+            idx_bad = range(5, toa_act, step_bad)
+            # Apply the reduction factor to the DNs
+            toa[:, idx_bad] *= bad_pix_red
+
+        idx_dead = []
+        if n_dead > 0:
+            step_dead = int(toa_act / n_dead)
+            # Distribute evenly in the CCD starting at index 0
+            idx_dead = range(0, toa_act, step_dead)
+            # Apply the reduction factor to the DNs
+            toa[:, idx_dead] *= dead_pix_red
+
+        # Save to file the indexes for validation purposes
+        with open(self.outdir + '/bad_dead_indexes.txt', 'w') as f:
+            f.write(f"Bad pixel indexes: {list(idx_bad)}\n")
+            f.write(f"Dead pixel indexes: {list(idx_dead)}\n")
+
         return toa
 
     def prnu(self, toa, kprnu):
