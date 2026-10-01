@@ -56,6 +56,8 @@ class videoChainPhase(initIsm):
         :return: output toa in [V]
         """
         #TODO
+
+        toa = toa*OCF*gain_adc
         return toa
 
     def digitisation(self, toa, bit_depth, min_voltage, max_voltage):
