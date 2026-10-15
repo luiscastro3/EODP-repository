@@ -154,18 +154,16 @@ class detectionPhase(initIsm):
         idx_bad = []
         if n_bad > 0:
             step_bad = int(toa_act / n_bad)
-            # Distribute evenly in the CCD starting at index 5
             idx_bad = range(5, toa_act, step_bad)
-            # Apply the reduction factor to the DNs
-            toa[:, idx_bad] *= bad_pix_red
+            # Retain (1 - attenuation) of the signal
+            toa[:, idx_bad] *= (1.0 - bad_pix_red)
 
         idx_dead = []
         if n_dead > 0:
             step_dead = int(toa_act / n_dead)
-            # Distribute evenly in the CCD starting at index 0
             idx_dead = range(0, toa_act, step_dead)
-            # Apply the reduction factor to the DNs
-            toa[:, idx_dead] *= dead_pix_red
+            # Retain (1 - attenuation) of the signal
+            toa[:, idx_dead] *= (1.0 - dead_pix_red)
 
         # Save to file the indexes for validation purposes
         with open(self.outdir + '/bad_dead_indexes.txt', 'w') as f:
