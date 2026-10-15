@@ -3,71 +3,87 @@ import numpy as np
 import netCDF4 as nc
 
 
-def cross_validate_outputs(my_out_dir, teacher_out_dir, tol_pct=1e-3):
-    """
-    Compares .nc files in my_out_dir with those in teacher_out_dir.
-    Passes if the maximum relative difference is < tol_pct.
-    """
-    # Convert percentage tolerance to fractional tolerance
-    tol_frac = tol_pct / 100.0
+def validate_ism_results(ref_dir, my_dir, threshold_pct=1e-3):
+    # Convert percentage to decimal (1e-3 % = 1e-5)
+    threshold = threshold_pct / 100.0
 
-    my_files = [f for f in os.listdir(my_out_dir) if f.endswith('.nc')]
+    # Filter for NetCDF files (adapted for ISM outputs)
+    files_to_check = [f for f in os.listdir(my_dir) if f.endswith('.nc')]
 
-    if not my_files:
-        print(f"No .nc files found in {my_out_dir}")
+    if not files_to_check:
+        print("No matching .nc files found in the target directory.")
         return
 
-    print(f"Starting cross-validation with tolerance: {tol_pct}% ({tol_frac})\n"
-          f"{'-' * 60}")
+    all_passed = True
 
-    for filename in my_files:
-        my_path = os.path.join(my_out_dir, filename)
-        teacher_path = os.path.join(teacher_out_dir, filename)
+    for filename in files_to_check:
+        ref_path = os.path.join(ref_dir, filename)
+        my_path = os.path.join(my_dir, filename)
 
-        if not os.path.exists(teacher_path):
-            print(f"[SKIP] {filename:<30} -> Not found in teacher output.")
+        if not os.path.exists(ref_path):
+            print(f"Skipping {filename}: Not found in teacher's output directory.")
             continue
 
-        try:
-            ds_my = nc.Dataset(my_path, 'r')
-            ds_teacher = nc.Dataset(teacher_path, 'r')
+        print(f"Validating: {filename}...")
 
-            # Iterate through all variables in the netCDF file
-            for var_name in ds_my.variables:
-                # Skip dimension variables if any
-                if var_name not in ds_teacher.variables:
+        # Open both datasets
+        with nc.Dataset(ref_path, 'r') as ds_ref, nc.Dataset(my_path, 'r') as ds_my:
+            # Iterate through all variables in the NetCDF file
+            for var_name in ds_ref.variables:
+                if var_name not in ds_my.variables:
+                    print(f"  [ERROR] Variable '{var_name}' missing in your output.")
+                    all_passed = False
                     continue
 
+                # Extract data as numpy arrays
+                ref_data = ds_ref.variables[var_name][:]
                 my_data = ds_my.variables[var_name][:]
-                teacher_data = ds_teacher.variables[var_name][:]
 
-                # Suppress divide-by-zero warnings for safe masking
+                # Ensure the data types are numeric before calculating differences
+                if not np.issubdtype(ref_data.dtype, np.number):
+                    continue
+
+                # Handle masked arrays (common in NetCDF) by filling with NaNs for safe comparison
+                if np.ma.isMaskedArray(ref_data):
+                    ref_data = ref_data.filled(np.nan)
+                if np.ma.isMaskedArray(my_data):
+                    my_data = my_data.filled(np.nan)
+
+                # Calculate relative difference: |(my - ref) / ref|
+                # Suppress division by zero warnings to handle them cleanly
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    # Calculate relative difference
-                    rel_diff = np.abs((my_data - teacher_data) / teacher_data)
+                    rel_diff = np.abs((my_data - ref_data) / ref_data)
 
-                    # Handle exact zeros in teacher data (avoid NaN)
-                    zeros_mask = (teacher_data == 0)
-                    rel_diff[zeros_mask] = np.abs(my_data[zeros_mask])
+                # Handle edge cases
+                rel_diff[np.isnan(rel_diff)] = 0.0  # Ignore regions where both are NaN
 
+                # If ref is exactly 0, check absolute diff instead
+                zero_mask = (ref_data == 0)
+                rel_diff[zero_mask] = np.abs(my_data[zero_mask])
+
+                # Floating-point noise safeguard for near-zero values
+                near_zero_mask = (np.abs(ref_data) < 1e-12) & (np.abs(my_data - ref_data) < 1e-12)
+                rel_diff[near_zero_mask] = 0.0
+
+                # Get the maximum relative difference
                 max_rel_diff = np.nanmax(rel_diff)
-                max_rel_diff_pct = max_rel_diff * 100.0
 
-                if max_rel_diff_pct <= tol_pct:
-                    print(f"[PASS] {filename:<30} | Var: {var_name:<5} | Max Diff: {max_rel_diff_pct:.8f}%")
+                if max_rel_diff >= threshold:
+                    print(f"  [FAIL] {var_name} | Max Rel Diff: {max_rel_diff * 100:.6e}% >= {threshold_pct}%")
+                    all_passed = False
                 else:
-                    print(f"[FAIL] {filename:<30} | Var: {var_name:<5} | Max Diff: {max_rel_diff_pct:.8e}%")
+                    print(f"  [PASS] {var_name} | Max Rel Diff: {max_rel_diff * 100:.6e}% < {threshold_pct}%")
 
-        except Exception as e:
-            print(f"[ERROR] Processing {filename}: {e}")
-        finally:
-            if 'ds_my' in locals() and ds_my.isopen(): ds_my.close()
-            if 'ds_teacher' in locals() and ds_teacher.isopen(): ds_teacher.close()
+    print("\n--- Final Verdict ---")
+    if all_passed:
+        print(f"SUCCESS: All results demonstrated a relative difference lower than {threshold_pct}%")
+    else:
+        print("FAILED: One or more variables exceeded the maximum allowed relative difference.")
 
 
-if __name__ == "__main__":
-    # Update these paths to point to the directories containing the .nc files
-    MY_OUTPUT_FOLDER = r'C:\Users\Luis Castro\Downloads\EODP\EODP_TER_2021\EODP-TS-ISM\myOutput'
-    TEACHER_OUTPUT_FOLDER = r'C:\Users\Luis Castro\Downloads\EODP\EODP_TER_2021\EODP-TS-ISM\output'
+# Define your paths here
+teacher_output = r"C:\Users\Luis Castro\Downloads\EODP\EODP_TER_2021\EODP-TS-ISM\output"
+my_output = r"C:\Users\Luis Castro\Downloads\EODP\EODP_TER_2021\EODP-TS-ISM\myOutput"
 
-    cross_validate_outputs(MY_OUTPUT_FOLDER, TEACHER_OUTPUT_FOLDER, tol_pct=1e-3)
+# Run validation
+validate_ism_results(teacher_output, my_output)
