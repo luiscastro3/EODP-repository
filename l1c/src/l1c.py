@@ -39,6 +39,9 @@ class l1c(initL1c):
             # -------------------------------------------------------------------------------
             writeL1c(self.outdir, self.globalConfig.l1c_toa + band, lat_l1c, lon_l1c, toa_l1c)
 
+            # Generate and save report plots
+            self.generate_report_plots(lat, lon, lat_l1c, lon_l1c, band)
+
             self.logger.info("End of BAND " + band)
 
         self.logger.info("End of the L1C Module!")
