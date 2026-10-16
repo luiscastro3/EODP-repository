@@ -68,7 +68,15 @@ class l1c(initL1c):
         m = mgrs.MGRS()
         mgrs_tiles = set([])
 
+        for i in range(toa.shape[0]):
+            for j in range(toa.shape[1]):
+                mgrs_tile = m.toMGRS(lat[i,j],lon[i,j],MGRSPrecision=self.l1cConfig.mgrs_tile_precision)
+                mgrs_tiles.add(mgrs_tile)
+
+        mgrs_tiles = list(mgrs_tiles)
+
         
+
         return lat_l1c, lon_l1c, toa_l1c
 
     def checkSize(self, lat,toa):
