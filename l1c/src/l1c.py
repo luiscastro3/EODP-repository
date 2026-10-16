@@ -104,9 +104,15 @@ class l1c(initL1c):
 
         # Plot 1: L1B vs L1C Grid
         plt.figure(figsize=(10, 6))
-        plt.scatter(lon, lat, c='red', label='L1B Grid (Irregular)', s=5, alpha=0.6)
-        plt.scatter(lon_l1c, lat_l1c, c='blue', label='L1C Grid (Regular MGRS)', s=5, alpha=0.6)
-        plt.title(f'Figure 9-2: L1B versus L1C grids ({band})')
+
+        # Extract the boundary of the L1B grid to draw it as a continuous blue line
+        lon_bound = np.concatenate([lon[0, :], lon[:, -1], lon[-1, ::-1], lon[::-1, 0]])
+        lat_bound = np.concatenate([lat[0, :], lat[:, -1], lat[-1, ::-1], lat[::-1, 0]])
+
+        plt.plot(lon_bound, lat_bound, c='blue', label='L1B Grid (Irregular)', linewidth=1.5)
+        plt.scatter(lon_l1c, lat_l1c, c='red', label='L1C Grid (Regular MGRS)', s=5, alpha=0.6)
+
+        plt.title(f'Projection on ground ({band})')
         plt.xlabel('Longitude')
         plt.ylabel('Latitude')
         plt.legend()
