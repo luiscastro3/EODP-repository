@@ -63,6 +63,12 @@ class l1c(initL1c):
         :return: L1C radiances, L1C latitude and longitude in degrees
         '''
         #TODO
+
+        tck = bisplrep(lat, lon, toa)
+        m = mgrs.MGRS()
+        mgrs_tiles = set([])
+
+        
         return lat_l1c, lon_l1c, toa_l1c
 
     def checkSize(self, lat,toa):
