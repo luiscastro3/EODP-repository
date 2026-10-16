@@ -10,6 +10,7 @@ from scipy.interpolate import bisplrep, bisplev
 import matplotlib.pyplot as plt
 from common.io.l1cProduct import writeL1c
 from matplotlib import cm
+from geopy.distance import great_circle
 
 class l1c(initL1c):
 
@@ -94,3 +95,39 @@ class l1c(initL1c):
         :return: NA
         '''
         #TODO
+
+    def generate_report_plots(self, lat, lon, lat_l1c, lon_l1c, band):
+        import os
+
+        # Plot 1: L1B vs L1C Grid
+        plt.figure(figsize=(10, 6))
+        plt.scatter(lon, lat, c='red', label='L1B Grid (Irregular)', s=5, alpha=0.6)
+        plt.scatter(lon_l1c, lat_l1c, c='blue', label='L1C Grid (Regular MGRS)', s=5, alpha=0.6)
+        plt.title(f'Figure 9-2: L1B versus L1C grids ({band})')
+        plt.xlabel('Longitude')
+        plt.ylabel('Latitude')
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(os.path.join(self.outdir, f'figure_9_2_grids_{band}.png'), bbox_inches='tight')
+        plt.close()
+
+        # Plot 2: Spatial Sampling Distance
+        central_row_idx = lat.shape[0] // 2
+        central_lat = lat[central_row_idx, :]
+        central_lon = lon[central_row_idx, :]
+
+        distances = []
+        for i in range(len(central_lat) - 1):
+            point1 = (central_lat[i], central_lon[i])
+            point2 = (central_lat[i + 1], central_lon[i + 1])
+            dist_meters = great_circle(point1, point2).meters
+            distances.append(dist_meters)
+
+        plt.figure(figsize=(10, 4))
+        plt.plot(distances, marker='o', linestyle='-', color='green')
+        plt.title(f'Spatial Sampling Distance (Central Row of L1B - {band})')
+        plt.xlabel('Pixel Index (Across-Track)')
+        plt.ylabel('Distance (meters)')
+        plt.grid(True)
+        plt.savefig(os.path.join(self.outdir, f'spatial_sampling_distance_{band}.png'), bbox_inches='tight')
+        plt.close()
