@@ -8,7 +8,7 @@ import mgrs
 auxdir = 'C:/Users/Luis Castro/Documents/GitHub/EODP-repository/auxiliary'
 # GM dir + L1B dir
 indir = 'C:/Users/Luis Castro/Downloads/EODP/EODP_TER_2021/EODP-TS-L1C/input/gm_alt100_act_150/,C:/Users/Luis Castro/Downloads/EODP/EODP_TER_2021/EODP-TS-L1C/input/l1b_output'
-outdir = 'C:/Users/Luis Castro/Downloads/EODP/EODP_TER_2021/EODP-TS-L1C/input/myOutput'
+outdir = 'C:/Users/Luis Castro/Downloads/EODP/EODP_TER_2021/EODP-TS-L1C/myOutput'
 # Initialise the ISM
 myL1c = l1c(auxdir, indir, outdir)
 myL1c.processModule()
