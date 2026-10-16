@@ -75,7 +75,13 @@ class l1c(initL1c):
 
         mgrs_tiles = list(mgrs_tiles)
 
-        
+        toa_l1c = np.zeros(len(mgrs_tiles))
+        lat_l1c = np.zeros(len(mgrs_tiles))
+        lon_l1c = np.zeros(len(mgrs_tiles))
+
+        for i in range(len(mgrs_tiles)):
+            (lat_l1c[i], lon_l1c[i]) = m.toLatLon(mgrs_tiles[i])
+            toa_l1c[i] = bisplev(lat_l1c[i], lon_l1c[i], tck)
 
         return lat_l1c, lon_l1c, toa_l1c
 
